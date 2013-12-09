@@ -19,17 +19,14 @@ class GraphSpec extends FlatSpec with Matchers {
   )
   val G = system.actorOf( Props(classOf[Graph], G_dist) )
   val probe = TestProbe()
+  //avoid order for tests
+  val PFtoSet:PartialFunction[Any, Set[Edge]] = {case x:Array[Edge] => x.toSet}
 
   "Graph" should "respond to Look(at)" in {
     probe.send(G, Look(0))
-    probe.expectMsgPF(1.seconds){
-      case x:Array[Edge] => x.toSet //don't care about the order
-    } should equal ( Set(Edge(1,10,0), Edge(2,20,0)) )
+    probe.expectMsgPF(1.seconds)(PFtoSet) should equal ( Set(Edge(1,10,0), Edge(2,20,0)) )
 
     probe.send(G, Look(1))
-    probe.expectMsgPF(1.seconds){
-      case x:Array[Edge] => x.toSet //don't care about the order
-    } should equal ( Set(Edge(0,10,0), Edge(2,5,0)) )
+    probe.expectMsgPF(1.seconds)(PFtoSet) should equal ( Set(Edge(0,10,0), Edge(2,5,0)) )
   }
-
 }

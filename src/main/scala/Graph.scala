@@ -16,6 +16,8 @@ object Graph {
   case class Look(at: NodeID)
   case class Travel(from: NodeID, to: NodeID)
   case class Edge(to: NodeID, distance: Double, p_weight: Double)
+
+  def travelUpdate(e: Edge): Edge = e.copy(p_weight = e.p_weight + 1)
 }
 
 /**
@@ -37,8 +39,6 @@ class Graph(G_dist: Array[Array[Double]]) extends Actor {
     case Graph.Travel(from, to) =>
       G(from)(to) = travelUpdate(G(from)(to))
   }
-
-  def travelUpdate(e: Edge): Edge = e.copy(p_weight = e.p_weight + 1)
 }
 
 
