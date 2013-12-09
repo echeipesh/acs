@@ -10,8 +10,10 @@ import scala.concurrent.duration._
 import Graph._
 
 
-class GraphSpec extends FlatSpec with Matchers {
+class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   implicit val system = ActorSystem("TestSys")
+  override def afterAll()  { system.shutdown() }
+
   val G_dist:Array[Array[Double]] = Array(
     Array( 0.0, 10.0, 20.0),
     Array(10.0,  0.0,  5.0),
@@ -34,6 +36,6 @@ class GraphSpec extends FlatSpec with Matchers {
     probe.send(G, Travel(0,1))
     probe.send(G, Look(0))
 
-    val s = probe.expectMsgPF(1.seconds)(PFtoSet) should contain (Graph.localTrailUpdate(Edge(1,10,0)))
+    probe.expectMsgPF(1.seconds)(PFtoSet) should contain (Graph.localTrailUpdate(Edge(1,10,0)))
   }
 }
