@@ -12,12 +12,23 @@ import akka.actor.Actor
 
 object Graph {
   type NodeID = Int
+  /** Used to control the rate of change in pheromone deposits */
+  val alpha = 0.1
+
+  /** base for local trail updating*/
+  val tao_0 = 1
 
   case class Look(at: NodeID)
   case class Travel(from: NodeID, to: NodeID)
   case class Edge(to: NodeID, distance: Double, p_weight: Double)
 
-  def travelUpdate(e: Edge): Edge = e.copy(p_weight = e.p_weight + 1)
+  /**
+   * When an Ant uses an edge it changes the pheromone  on that trail
+   *
+   * The first portion represents trail decay (presumably 'time' passed last time this edge was used)
+   * The second portion is the new deposit
+   */
+  def localTrailUpdate(e: Edge): Edge = e.copy(p_weight = (1-alpha)*e.p_weight+alpha*tao_0 )
 }
 
 /**
@@ -37,7 +48,7 @@ class Graph(G_dist: Array[Array[Double]]) extends Actor {
       sender ! G(at).filter(_.to != at).toArray
 
     case Graph.Travel(from, to) =>
-      G(from)(to) = travelUpdate(G(from)(to))
+      G(from)(to) = localTrailUpdate(G(from)(to))
   }
 }
 

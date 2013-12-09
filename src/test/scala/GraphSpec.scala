@@ -29,4 +29,11 @@ class GraphSpec extends FlatSpec with Matchers {
     probe.send(G, Look(1))
     probe.expectMsgPF(1.seconds)(PFtoSet) should equal ( Set(Edge(0,10,0), Edge(2,5,0)) )
   }
+
+  it should "update on Travel(from, to)" in {
+    probe.send(G, Travel(0,1))
+    probe.send(G, Look(0))
+
+    val s = probe.expectMsgPF(1.seconds)(PFtoSet) should contain (Graph.localTrailUpdate(Edge(1,10,0)))
+  }
 }
