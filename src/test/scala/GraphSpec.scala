@@ -19,7 +19,7 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     Array(10.0,  0.0,  5.0),
     Array(20.0,  5.0,  0.0)
   )
-  val G = system.actorOf( Props(classOf[Graph], G_dist) )
+  val G = system.actorOf( Props(classOf[Graph], G_dist), "GraphActor")
   val probe = TestProbe()
   //avoid order for tests
   val PFtoSet:PartialFunction[Any, Set[Edge]] = {case x:Array[Edge] => x.toSet}

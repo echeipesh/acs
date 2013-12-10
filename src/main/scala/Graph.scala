@@ -21,6 +21,8 @@ object Graph {
   case class Look(at: NodeID)
   case class Travel(from: NodeID, to: NodeID)
   case class Edge(to: NodeID, distance: Double, p_weight: Double)
+  case class GlobalUpdate(tours: Set[List[NodeID]])
+  case object UpdateDone
 
   /**
    * When an Ant uses an edge it changes the pheromone  on that trail
@@ -49,6 +51,8 @@ class Graph(G_dist: Array[Array[Double]]) extends Actor {
 
     case Graph.Travel(from, to) =>
       G(from)(to) = localTrailUpdate(G(from)(to))
+
+    case Graph.GlobalUpdate(tours) =>
   }
 }
 

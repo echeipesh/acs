@@ -19,19 +19,11 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   )
   val G = system.actorOf( Props(classOf[Graph], G_dist), "GraphActor")
 
-  class Tap(probe: ActorRef) extends Actor {
-    def receive = {
-      case msg => probe.tell(msg, sender)
-    }
+  "Ant" should "send Travel in response to view update" in {
+    val probe = TestProbe()
+    val ant =  system.actorOf( Props(classOf[Ant], probe.ref, 0), "TestAnt")
+    probe.expectMsg(Look(0))
+    probe.forward(G)
   }
-
-//  "Ant" should "send Travel in response to view update" in {
-//    val antProbe = TestProbe()
-//    //this will error out
-//    val tap = system.actorOf( Props(classOf[Tap], antProbe.ref), "TappedAnt" )
-//    val ant =  system.actorOf( Props(classOf[Ant], tap))
-//    antProbe.expectMsg(Look(0))
-//    antProbe.forward(G, Look(0))
-//  }
 
 }
