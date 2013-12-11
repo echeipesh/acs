@@ -8,7 +8,8 @@
  *  A more flexible alternative would be to accept Travel(from, to, f:Edge=>Edge) and use f for update.
  *  As long as f does not close over parent Actor scope it would be safe to use.
  */
-import akka.actor.Actor
+
+import akka.actor.{Props, ActorRef, Actor}
 
 object Graph {
   type NodeID = Int
@@ -21,7 +22,9 @@ object Graph {
   case class Look(at: NodeID)
   case class Travel(from: NodeID, to: NodeID)
   case class Edge(to: NodeID, distance: Double, p_weight: Double)
-  case class GlobalUpdate(tours: Set[List[NodeID]])
+
+  case class Tour(length: Double, path: List[Graph.NodeID])
+  case class GlobalUpdate(tour: Tour)
   case object UpdateDone
 
   /**
@@ -31,6 +34,8 @@ object Graph {
    * The second portion is the new deposit
    */
   def localTrailUpdate(e: Edge): Edge = e.copy(p_weight = (1-alpha)*e.p_weight+alpha*tao_0 )
+
+  def Props(g_dist: Array[Array[Double]]):Props = akka.actor.Props(classOf[Graph], g_dist)
 }
 
 /**
@@ -52,7 +57,8 @@ class Graph(G_dist: Array[Array[Double]]) extends Actor {
     case Graph.Travel(from, to) =>
       G(from)(to) = localTrailUpdate(G(from)(to))
 
-    case Graph.GlobalUpdate(tours) =>
+    case Graph.GlobalUpdate(tour) =>
+      sender ! UpdateDone //Total lie
   }
 }
 
