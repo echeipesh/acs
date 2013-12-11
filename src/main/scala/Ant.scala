@@ -30,19 +30,17 @@ class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
     case view:Array[Edge] => //got a response to Look
       val freshView = view.filter(edge=> !path.contains(edge.to))
 
-      if (freshView.isEmpty){
+      if (! freshView.isEmpty){
+        val chosen = chooseEdge(freshView)
+        takeEdge(chosen)
+
+      }else{
         //SUCCESS! nothing else to see
         //recall G is fully connected, so we can always return to start
-        context.parent ! Ant.TourCompleted(Graph.Tour(distanceCovered, start :: path))
+        val edgeHome = view.filter(_.to == start).head
+        takeEdge(edgeHome)
+        context.parent ! Ant.TourCompleted(Graph.Tour(distanceCovered,path))
         context.stop(self)
-
-      }else{ //We have fresh nodes to explore, onward!
-        val chosen = chooseEdge(freshView)
-        distanceCovered += chosen.distance
-        println(s"going to $chosen")
-        G ! Graph.Travel(path.head, chosen.to)
-        G ! Graph.Look(chosen.to)
-        path = chosen.to :: path
       }
   }
 
@@ -50,4 +48,14 @@ class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
     //yeah, this isn't actually the real way
     view( rng.nextInt(view.length) )
   }
+
+  def takeEdge(chosen:Edge) = {
+    val from = path.head
+    path = chosen.to :: path
+    distanceCovered += chosen.distance
+    G ! Graph.Travel(from, chosen.to)
+    if (chosen.to != start) //no point if we're finished a tour
+      G ! Graph.Look(chosen.to)
+  }
+
 }
