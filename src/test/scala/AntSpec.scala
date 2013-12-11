@@ -38,9 +38,9 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     stepColony ! Array(Graph.Edge(1, 20, 0)) //only one way to go
     probe.expectMsg(Graph.Travel(0, 1)) //just follow the crumbs
     probe.expectMsg(Graph.Look(1))    //look around the new place
-    stepColony ! Array(Graph.Edge(1, 20, 0)) //it's a loop!
+    stepColony ! Array(Graph.Edge(1, 20, 0), Graph.Edge(0, 20, 0)) //it's a loop!
     //Now the ant should NOT go through this edge but assume success and report to parent
-    colonyProbe.expectMsg(Ant.TourCompleted(Graph.Tour(20, 0::1::0::Nil)))
+    colonyProbe.expectMsg(Ant.TourCompleted(Graph.Tour(40, 0::1::0::Nil)))
   }
 
 }
