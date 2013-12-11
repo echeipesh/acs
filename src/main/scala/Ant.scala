@@ -1,6 +1,12 @@
 /**
  * User: eugene
  * Date: 12/8/13
+ *
+ * Design Decisions:
+ * 1. Notice that we ask for a View to make our own choice where to go.
+ *  We could in reality just ask the graph to make the choice for us and let us know.
+ *  However in this manner we can have ants following multiple decision algorithms,
+ *  which is something I'm curious to try later :)
  */
 
 import akka.actor.{Props, ActorRef, Actor}
@@ -27,7 +33,7 @@ class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
   G ! Graph.Look(start)
 
   def receive = {
-    case view:Array[Edge] => //got a response to Look
+    case view:Graph.View => //got a response to Look
       val freshView = view.filter(edge=> !path.contains(edge.to))
 
       if (! freshView.isEmpty){
@@ -44,9 +50,30 @@ class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
       }
   }
 
-  def chooseEdge(view: Array[Edge]): Edge ={
-    //yeah, this isn't actually the real way
-    view( rng.nextInt(view.length) )
+  def chooseEdge(view: Graph.View): Edge ={
+    def chooseWeighted(xs: Seq[(Graph.Edge, Double)]):Edge = {
+      val total = xs.map(_._2).sum
+      val xsr = rng.shuffle(xs.toSeq)
+      val target = rng.nextDouble() * total
+      val it = xsr.iterator
+      var x = it.next()
+      var acc = x._2
+      while (acc < target){ //hasNext is assumed by target value
+        x = it.next()
+        acc += x._2
+      }
+      x._1
+    }
+
+    val q = rng.nextDouble()
+    val ar = view.map(e => (e, e.p_weight * math.pow(1/e.distance, Graph.beta)))
+
+    if (q <= Graph.q_0)
+      //we select the trail with strongest pheromone to distance ratio
+      ar.maxBy(_._2)._1
+    else{
+      chooseWeighted(ar)
+    }
   }
 
   def takeEdge(chosen:Edge) = {

@@ -31,9 +31,10 @@ class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     val sp = system.actorOf(
       Props(new StepParent(Colony.Props(G), probe.ref)), "controller"
     )
-    sp ! Colony.Start(1)
+    sp ! Colony.Start(5)
     val tour = probe.expectMsgPF(1.second){case x: Graph.Tour => x}
 
+    //between 5 ants it should be hard not to find the optimal here
     tour.length should equal (20.0)
     tour.path.toSet should equal (List(0, 1, 3, 2, 0).toSet)
     tour.path.length should equal (5)
