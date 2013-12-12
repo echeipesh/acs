@@ -67,7 +67,7 @@ class Colony(G: ActorRef) extends Actor {
 
   def UnleashTheAnts(n: Int):Unit = {
     for (i <- 1 to n) {
-      children += context.actorOf( Ant.Props(G, 0), s"Ant_$i")
+      children += context.actorOf( Ant.Props(G, 0))
     }
   }
 }
