@@ -16,15 +16,16 @@ import akka.actor.{Props, ActorRef, Actor}
 
 object Graph {
   type NodeID = Int
+  type Matrix[T] = Array[Array[T]]
   /** Used to control the rate of change in pheromone deposits */
   val alpha = 0.1
   /** weighs the relative importance of closeness vs pheromone trail in choices*/
   val beta = 1
   /** base for local trail updating*/
-  val tao_0 = 1
+  val tao_0 = 0.1
 
   /** useful for something */
-  val q_0 = 0.5
+  val q_0 = 0.9
 
   case class Look(at: NodeID)
   type View = Array[Edge]
@@ -50,13 +51,13 @@ object Graph {
   def globalTrailUpdate(e: Edge, tourLength:Double): Edge =
     e.copy(p_weight = (1-alpha)*e.p_weight+alpha*(1/tourLength))
 
-  def Props(g_dist: Array[Array[Double]]):Props = akka.actor.Props(classOf[Graph], g_dist)
+  def Props(g_dist: Matrix[Double]):Props = akka.actor.Props(classOf[Graph], g_dist)
 }
 
 /**
  * Graph is assumed to be completely connected, edge exists between every pair of vertices
  */
-class Graph(G_dist: Array[Array[Double]]) extends Actor {
+class Graph(G_dist: Graph.Matrix[Double]) extends Actor {
   import Graph._
   val G =
     for {from <- 0 until G_dist.length} yield

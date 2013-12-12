@@ -14,7 +14,7 @@ class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   //We need at least 4 nodes to test TSP meaningfully
   //We'd exepect A-D and C-B routes to be avoided
-  val G_dist:Array[Array[Double]] = Array(
+  val G_dist:Graph.Matrix[Double] = Array(
     //       A,    B,    C,    D
     Array( 0.0,  5.0,  5.0, 20.0),
     Array( 5.0,  0.0, 20.0,  5.0),

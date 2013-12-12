@@ -14,7 +14,7 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   implicit val system = ActorSystem("TestSys")
   override def afterAll()  { system.shutdown() }
 
-  val G_dist:Array[Array[Double]] = Array(
+  val G_dist:Graph.Matrix[Double] = Array(
     Array( 0.0, 10.0, 20.0),
     Array(10.0,  0.0,  5.0),
     Array(20.0,  5.0,  0.0)
