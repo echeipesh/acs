@@ -47,14 +47,13 @@ class Graph(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
       sender ! G(at).filter(_.to != at).toArray
 
     case Graph.Travel(from, to) =>
-      //This just shows I shouldn't be keeping the full matrix, but rather only one triangle of it
       G(from)(to) = localTrailUpdate(G(from)(to))
-      G(to)(from) = G(from)(to)
+      G(to)(from) = localTrailUpdate(G(to)(from))
 
     case Graph.GlobalUpdate(tour) =>
       for (List(from,to) <- (tour.path sliding 2)) {
         G(from)(to) = globalTrailUpdate(G(from)(to), tour.length)
-        G(to)(from) = G(from)(to)
+        G(to)(from) = globalTrailUpdate(G(to)(from), tour.length)
       }
       sender ! UpdateDone
   }
