@@ -52,11 +52,10 @@ class Colony(G: ActorRef) extends Actor {
 
   val running: Receive = {
     case Ant.TourCompleted(tour: Graph.Tour) =>
-      children -= sender
       if (tour.length < bestTour.length)
         bestTour = tour
 
-      if (children.isEmpty)
+      if (context.children.isEmpty)
         G ! Graph.GlobalUpdate(bestTour)
 
     case Graph.UpdateDone  =>
@@ -66,8 +65,8 @@ class Colony(G: ActorRef) extends Actor {
   }
 
   def UnleashTheAnts(n: Int):Unit = {
-    for (i <- 1 to n) {
-      children += context.actorOf( Ant.Props(G, 0))
+    for (i <- 1 to n){
+      context.actorOf( Ant.Props(G, 0))
     }
   }
 }
