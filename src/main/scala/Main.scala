@@ -2,7 +2,8 @@ import akka.actor._
 import scala.concurrent.duration._
 
 class Main extends Actor {
-  context.setReceiveTimeout(10.second)
+  import context.dispatcher
+  context.system.scheduler.scheduleOnce(30 seconds, self, "STOP")
 
   val colony = context.actorOf(Colony.Props(TspData.readTspFile("tsp.dat"), Params.default), "Colony")
 
@@ -10,11 +11,10 @@ class Main extends Actor {
 
   def receive = {
     case Graph.Tour(length, path) =>
-      println(s"TOUR($length): $path")
+      println(s"TOUR($length)")
       colony ! Colony.Start(10)
 
-    case ReceiveTimeout =>
-      println("STOP STOP SOP!")
+    case "STOP" =>
       context.system.shutdown()
   }
 }
