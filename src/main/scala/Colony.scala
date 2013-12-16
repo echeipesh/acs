@@ -24,9 +24,8 @@ object Colony {
  *  - Give current best tour
  *
  * exploring: The ants, they are crawling
- *  - buffer start request
  *  - receive TourCompleted and update the tours
- *  - receieve UpdateDone in response to Global update
+ *  - receive UpdateDone in response to Global update
  *      only to best sent out after all the ants return
  *
  * @param G Actor representing a Graph we are traversing
