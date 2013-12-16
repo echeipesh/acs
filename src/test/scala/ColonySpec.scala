@@ -21,7 +21,6 @@ class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     Array( 5.0, 20.0,  0.0,  5.0),
     Array(20.0,  5.0,  5.0,  0.0)
   )
-  val G = system.actorOf( Graph.Props(G_dist), "Graph")
 
   "Colony" should "solve TSP" in {
     val probe = TestProbe()
@@ -29,7 +28,7 @@ class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     //Colony is going to launch ants as soon as it's constructed
     //it should report to it's parent
     val sp = system.actorOf(
-      Props(new StepParent(Colony.Props(G), probe.ref)), "controller"
+      Props(new StepParent(Colony.Props(G_dist, Params.default), probe.ref))
     )
     sp ! Colony.Start(5)
     val tour = probe.expectMsgPF(1.second){case x: Graph.Tour => x}

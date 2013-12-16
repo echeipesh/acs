@@ -13,7 +13,7 @@ import akka.actor.{Props, ActorRef, Actor}
 
 object Ant{
   case class TourCompleted(tour: Graph.Tour)
-  def Props(g: ActorRef, start: Graph.NodeID):Props = akka.actor.Props(classOf[Ant], g, start)
+  def Props(g: ActorRef, start: Graph.NodeID, params: Params):Props = akka.actor.Props(classOf[Ant], g, start, params)
 }
 
 /**
@@ -22,7 +22,7 @@ object Ant{
  * @param G the graph Ant is exploring
  * @param start index of the starting node (0-indexed)
  */
-class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
+class Ant(G: ActorRef, start: Graph.NodeID, params: Params) extends Actor {
   import Graph._
 
   //path traveled, in reverse order
@@ -66,9 +66,9 @@ class Ant(G: ActorRef, start: Graph.NodeID) extends Actor {
     }
 
     val q = rng.nextDouble()
-    val ar = view.map(e => (e, e.p_weight * math.pow(1/e.distance, Graph.beta)))
+    val ar = view.map(e => (e, e.p_weight * math.pow(1/e.distance, params.beta)))
 
-    if (q <= Graph.q_0)
+    if (q <= params.q_0)
       //we select the trail with strongest pheromone to distance ratio
       ar.maxBy(_._2)._1
     else{

@@ -17,15 +17,6 @@ import akka.actor.{Props, ActorRef, Actor}
 object Graph {
   type NodeID = Int
   type Matrix[T] = Array[Array[T]]
-  /** Used to control the rate of change in pheromone deposits */
-  val alpha = 0.1
-  /** weighs the relative importance of closeness vs pheromone trail in choices*/
-  val beta = 1
-  /** base for local trail updating*/
-  val tao_0 = 0.1
-
-  /** useful for something */
-  val q_0 = 0.9
 
   case class Look(at: NodeID)
   type View = Array[Edge]
@@ -36,28 +27,13 @@ object Graph {
   case class GlobalUpdate(tour: Tour)
   case object UpdateDone
 
-  /**
-   * When an Ant uses an edge it changes the pheromone  on that trail
-   *
-   * The first portion represents trail decay (presumably 'time' passed last time this edge was used)
-   * The second portion is the new deposit
-   */
-  def localTrailUpdate(e: Edge): Edge =
-    e.copy(p_weight = (1-alpha)*e.p_weight+alpha*tao_0 )
-
-  /**
-   * This rule is used to reward the best tour in the iteration
-   */
-  def globalTrailUpdate(e: Edge, tourLength:Double): Edge =
-    e.copy(p_weight = (1-alpha)*e.p_weight+alpha*(1/tourLength))
-
-  def Props(g_dist: Matrix[Double]):Props = akka.actor.Props(classOf[Graph], g_dist)
+  def Props(g_dist: Matrix[Double], params:Params):Props = akka.actor.Props(classOf[Graph], g_dist, params)
 }
 
 /**
  * Graph is assumed to be completely connected, edge exists between every pair of vertices
  */
-class Graph(G_dist: Graph.Matrix[Double]) extends Actor {
+class Graph(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
   import Graph._
   val G =
     for {from <- 0 until G_dist.length} yield
@@ -82,6 +58,22 @@ class Graph(G_dist: Graph.Matrix[Double]) extends Actor {
       }
       sender ! UpdateDone
   }
+
+
+  /**
+   * When an Ant uses an edge it changes the pheromone  on that trail
+   *
+   * The first portion represents trail decay (presumably 'time' passed last time this edge was used)
+   * The second portion is the new deposit
+   */
+  def localTrailUpdate(e: Edge): Edge =
+    e.copy(p_weight = (1-params.alpha)*e.p_weight+params.alpha*params.tao_0 )
+
+  /**
+   * This rule is used to reward the best tour in the iteration
+   */
+  def globalTrailUpdate(e: Edge, tourLength:Double): Edge =
+    e.copy(p_weight = (1-params.alpha)*e.p_weight+params.alpha*(1/tourLength))
 }
 
 

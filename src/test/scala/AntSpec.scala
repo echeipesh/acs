@@ -17,11 +17,11 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     Array(10.0,  0.0,  5.0),
     Array(20.0,  5.0,  0.0)
   )
-  val G = system.actorOf( Graph.Props(G_dist), "GraphActor")
+  val G = system.actorOf( Graph.Props(G_dist, Params.default), "GraphActor")
 
   "Ant" should "send Travel in response to view update" in {
     val probe = TestProbe()
-    val ant =  system.actorOf( Ant.Props(probe.ref, 0))
+    val ant =  system.actorOf( Ant.Props(probe.ref, 0, Params.default))
     probe.expectMsg(Graph.Look(0))
     probe.send(ant, Array(Graph.Edge(1, 20, 0)))
   }
@@ -31,7 +31,7 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     val colonyProbe = TestProbe()
     //stepColony will forward its msgs to the child(Ant)
     val stepColony = system.actorOf(
-      Props(new StepParent(Ant.Props(probe.ref, 0), colonyProbe.ref))
+      Props(new StepParent(Ant.Props(probe.ref, 0, Params.default), colonyProbe.ref))
     )
 
     probe.expectMsg(Graph.Look(0))

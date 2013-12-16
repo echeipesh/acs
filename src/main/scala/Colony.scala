@@ -3,6 +3,7 @@
  * Date: 12/8/13
  */
 
+
 import akka.actor._
 import akka.actor.Props
 
@@ -10,7 +11,7 @@ object Colony {
   /** Start a cycle with given number of ants */
   case class Start(ants: Int)
   case object GiveBestTour
-  def Props(g: ActorRef):Props = akka.actor.Props(classOf[Colony], g)
+  def Props(g: Graph.Matrix[Double], params: Params):Props = akka.actor.Props(classOf[Colony], g, params)
 }
 /**
  * What do we do here?
@@ -30,18 +31,19 @@ object Colony {
  *
  * @param G Actor representing a Graph we are traversing
  */
-class Colony(G: ActorRef) extends Actor {
+class Colony(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
   import Colony._
 
-  var children: Set[ActorRef] = Set.empty
+  val G = context.actorOf( Graph.Props(G_dist, params) )
+
   //This should probably be Option[Tour]
+  var ants:Set[ActorRef] = Set.empty
   var bestTour: Graph.Tour = Graph.Tour(Double.MaxValue, Nil)
 
   def receive = waiting
 
   val waiting: Receive = {
     case Colony.Start(n) =>
-      children = Set.empty
       context.become(running)
       UnleashTheAnts(n)
 
@@ -51,10 +53,11 @@ class Colony(G: ActorRef) extends Actor {
 
   val running: Receive = {
     case Ant.TourCompleted(tour: Graph.Tour) =>
+      ants -= sender
       if (tour.length < bestTour.length)
         bestTour = tour
 
-      if (context.children.isEmpty)
+      if (ants.isEmpty)
         G ! Graph.GlobalUpdate(bestTour)
 
     case Graph.UpdateDone  =>
@@ -65,7 +68,7 @@ class Colony(G: ActorRef) extends Actor {
 
   def UnleashTheAnts(n: Int):Unit = {
     for (i <- 1 to n){
-      context.actorOf( Ant.Props(G, 0))
+      ants += context.actorOf( Ant.Props(G, 0, params))
     }
   }
 }
