@@ -40,4 +40,19 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     //dubuious test, basically something has happened and it's good enough to know that.
     probe.expectMsgPF(1.seconds)(PFtoSet) should not contain oldEdge
   }
+
+  it should "solve trivial nearest neighbor problem" in {
+    Graph.nearestNeighborTour(G_dist) should equal (10 + 5 + 20)
+
+    //The criss cross paths are 20, perimeter paths are 5
+    val G_dist_square:Graph.Matrix[Double] = Array(
+      //       A,    B,    C,    D
+      Array( 0.0,  5.0,  5.0, 20.0),
+      Array( 5.0,  0.0, 20.0,  5.0),
+      Array( 5.0, 20.0,  0.0,  5.0),
+      Array(20.0,  5.0,  5.0,  0.0)
+    )
+
+    Graph.nearestNeighborTour(G_dist_square) should equal (20)
+  }
 }

@@ -13,6 +13,7 @@
  */
 
 import akka.actor.{Props, ActorRef, Actor}
+import scala.annotation.tailrec
 
 object Graph {
   type NodeID = Int
@@ -26,6 +27,36 @@ object Graph {
   case class Tour(length: Double, path: List[Graph.NodeID])
   case class GlobalUpdate(tour: Tour)
   case object UpdateDone
+
+  def nearestNeighborTour(G_dist: Graph.Matrix[Double]):Double = {
+    @tailrec
+    def nn (at: NodeID, path: List[Long], tourLength:Double):Double = {
+      //make lists of next possible nodes
+      val nexts = for {
+        to <- 0 until G_dist(at).length
+        if to != at
+        if ! path.contains(to)
+      } yield to -> G_dist(at)(to)
+
+      if (nexts.isEmpty)
+        tourLength
+      else{
+        //choose the one with lowest distance (folding left)
+        val next = ( (0 -> Double.MaxValue) /: nexts ){
+          case (best, (to, dist)) =>
+            if (best._2 < dist)
+              best
+            else
+              (to, dist)
+        }
+
+        //return the length of the tour with chose + whatever length we choose after that
+        nn(next._1, next._1 :: path, next._2 + tourLength)
+      }
+    }
+
+    nn(0, Nil, 0)
+  }
 
   def Props(g_dist: Matrix[Double], params:Params):Props = akka.actor.Props(classOf[Graph], g_dist, params)
 }
