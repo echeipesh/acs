@@ -11,11 +11,11 @@ import akka.actor.Props
 import acs.Params
 import acs.Types._
 
-object Colony {
+object ColonyActor {
   /** Start a cycle with given number of ants */
   case class Start(ants: Int)
   case object GiveBestTour
-  def Props(g: Matrix[Double], params: Params):Props = akka.actor.Props(classOf[Colony], g, params)
+  def Props(g: Matrix[Double], params: Params):Props = akka.actor.Props(classOf[ColonyActor], g, params)
 }
 /**
  * What do we do here?
@@ -35,10 +35,10 @@ object Colony {
  *
  * @param G Actor representing a acs.akka.Graph we are traversing
  */
-class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
-  import Colony._
+class ColonyActor(G_dist: Matrix[Double], params: Params) extends Actor {
+  import ColonyActor._
 
-  val G = context.actorOf( Graph.Props(G_dist, params) )
+  val G = context.actorOf( GraphActor.Props(G_dist, params) )
 
   //This should probably be Option[Tour]
   var ants:Set[ActorRef] = Set.empty
@@ -47,7 +47,7 @@ class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
   def receive = waiting
 
   val waiting: Receive = {
-    case Colony.Start(n) =>
+    case ColonyActor.Start(n) =>
       context.become(running)
       UnleashTheAnts(n)
 
@@ -56,15 +56,15 @@ class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
   }
 
   val running: Receive = {
-    case Ant.TourCompleted(tour: Tour) =>
+    case AntActor.TourCompleted(tour: Tour) =>
       ants -= sender
       if (tour.length < bestTour.length)
         bestTour = tour
 
       if (ants.isEmpty)
-        G ! Graph.GlobalUpdate(bestTour)
+        G ! GraphActor.GlobalUpdate(bestTour)
 
-    case Graph.UpdateDone  =>
+    case GraphActor.UpdateDone  =>
       //Once graph is consistent with final state we notify parent of the best tour we found
       context.become(waiting)
       context.parent ! bestTour
@@ -72,7 +72,7 @@ class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
 
   def UnleashTheAnts(n: Int):Unit = {
     for (i <- 1 to n){
-      ants += context.actorOf( Ant.Props(G, 0, params))
+      ants += context.actorOf( AntActor.Props(G, 0, params))
     }
   }
 }

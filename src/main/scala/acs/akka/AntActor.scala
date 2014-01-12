@@ -11,14 +11,14 @@ package acs.akka
  *  which is something I'm curious to try later :)
  */
 
-import Graph._
+import GraphActor._
 import akka.actor.{Props, ActorRef, Actor}
 import acs.Params
 import acs.Types._
 
-object Ant{
+object AntActor{
   case class TourCompleted(tour: Tour)
-  def Props(g: ActorRef, start: NodeID, params: Params):Props = akka.actor.Props(classOf[Ant], g, start, params)
+  def Props(g: ActorRef, start: NodeID, params: Params):Props = akka.actor.Props(classOf[AntActor], g, start, params)
 }
 
 /**
@@ -27,17 +27,17 @@ object Ant{
  * @param G the graph acs.akka.Ant is exploring
  * @param start index of the starting node (0-indexed)
  */
-class Ant(G: ActorRef, start: NodeID, params: Params) extends Actor {
+class AntActor(G: ActorRef, start: NodeID, params: Params) extends Actor {
 
   //path traveled, in reverse order
   var path:List[NodeID] = start :: Nil
   var distanceCovered:Double = 0
   val rng = scala.util.Random
 
-  G ! Graph.Look(start)
+  G ! GraphActor.Look(start)
 
   def receive = {
-    case view:Graph.View => //got a response to Look
+    case view:GraphActor.View => //got a response to Look
       val freshView = view.filter(edge=> !path.contains(edge.to))
 
       if (! freshView.isEmpty){
@@ -49,13 +49,13 @@ class Ant(G: ActorRef, start: NodeID, params: Params) extends Actor {
         //recall G is fully connected, so we can always return to start
         val edgeHome = view.filter(_.to == start).head
         takeEdge(edgeHome)
-        context.parent ! Ant.TourCompleted(Tour(distanceCovered,path))
+        context.parent ! AntActor.TourCompleted(Tour(distanceCovered,path))
         context.stop(self)
       }
   }
 
-  def chooseEdge(view: Graph.View): Edge ={
-    def chooseWeighted(xs: Seq[(Graph.Edge, Double)]):Edge = {
+  def chooseEdge(view: GraphActor.View): Edge ={
+    def chooseWeighted(xs: Seq[(GraphActor.Edge, Double)]):Edge = {
       val total = xs.map(_._2).sum
       val xsr = rng.shuffle(xs.toSeq)
       val target = rng.nextDouble() * total
@@ -84,9 +84,9 @@ class Ant(G: ActorRef, start: NodeID, params: Params) extends Actor {
     val from = path.head
     path = chosen.to :: path
     distanceCovered += chosen.distance
-    G ! Graph.Travel(from, chosen.to)
+    G ! GraphActor.Travel(from, chosen.to)
     if (chosen.to != start) //no point if we're finished a tour
-      G ! Graph.Look(chosen.to)
+      G ! GraphActor.Look(chosen.to)
   }
 
 }

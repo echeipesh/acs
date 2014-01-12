@@ -5,12 +5,12 @@ package acs.akka
  * Date: 12/9/13
  */
 
-import acs.akka.{Graph}
+import acs.akka.{GraphActor}
 import akka.actor._
 import akka.testkit.TestProbe
 import org.scalatest._
 import scala.concurrent.duration._
-import Graph._
+import GraphActor._
 import acs.Params
 
 
@@ -18,12 +18,12 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   implicit val system = ActorSystem("TestSys")
   override def afterAll()  { system.shutdown() }
 
-  val G_dist:Graph.Matrix[Double] = Array(
+  val G_dist:GraphActor.Matrix[Double] = Array(
     Array( 0.0, 10.0, 20.0),
     Array(10.0,  0.0,  5.0),
     Array(20.0,  5.0,  0.0)
   )
-  val G = system.actorOf( Graph.Props(G_dist, Params.default), "GraphActor")
+  val G = system.actorOf( GraphActor.Props(G_dist, Params.default), "GraphActor")
   val probe = TestProbe()
   //avoid order for tests
   val PFtoSet:PartialFunction[Any, Set[Edge]] = {case x:Array[Edge] => x.toSet}
@@ -46,10 +46,10 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   it should "solve trivial nearest neighbor problem" in {
-    Graph.nearestNeighborTour(G_dist) should equal (10 + 5 + 20)
+    GraphActor.nearestNeighborTour(G_dist) should equal (10 + 5 + 20)
 
     //The criss cross paths are 20, perimeter paths are 5
-    val G_dist_square:Graph.Matrix[Double] = Array(
+    val G_dist_square:GraphActor.Matrix[Double] = Array(
       //       A,    B,    C,    D
       Array( 0.0,  5.0,  5.0, 20.0),
       Array( 5.0,  0.0, 20.0,  5.0),
@@ -57,6 +57,6 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
       Array(20.0,  5.0,  5.0,  0.0)
     )
 
-    Graph.nearestNeighborTour(G_dist_square) should equal (20)
+    GraphActor.nearestNeighborTour(G_dist_square) should equal (20)
   }
 }

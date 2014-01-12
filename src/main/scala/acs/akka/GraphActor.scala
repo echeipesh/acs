@@ -18,7 +18,7 @@ import akka.actor.{Props, Actor}
 import acs.Params
 import acs.Types._
 
-object Graph {
+object GraphActor {
   type View = Array[Edge]
 
   case class Look(at: NodeID)
@@ -28,14 +28,14 @@ object Graph {
   case class GlobalUpdate(tour: Tour)
   case object UpdateDone
 
-  def Props(g_dist: Matrix[Double], params:Params):Props = akka.actor.Props(classOf[Graph], g_dist, params)
+  def Props(g_dist: Matrix[Double], params:Params):Props = akka.actor.Props(classOf[GraphActor], g_dist, params)
 }
 
 /**
  * acs.akka.Graph is assumed to be completely connected, edge exists between every pair of vertices
  */
-class Graph(G_dist: Matrix[Double], params: Params) extends Actor {
-  import Graph._
+class GraphActor(G_dist: Matrix[Double], params: Params) extends Actor {
+  import GraphActor._
   val G =
     for {from <- 0 until G_dist.length} yield
       (for {to <- 0 until G_dist(from).length} yield
@@ -44,14 +44,14 @@ class Graph(G_dist: Matrix[Double], params: Params) extends Actor {
 
 
   def receive = {
-    case Graph.Look(at) => //send back Edges available at given location
+    case GraphActor.Look(at) => //send back Edges available at given location
       sender ! G(at).filter(_.to != at).toArray
 
-    case Graph.Travel(from, to) =>
+    case GraphActor.Travel(from, to) =>
       G(from)(to) = localTrailUpdate(G(from)(to))
       G(to)(from) = localTrailUpdate(G(to)(from))
 
-    case Graph.GlobalUpdate(tour) =>
+    case GraphActor.GlobalUpdate(tour) =>
       for (List(from,to) <- (tour.path sliding 2)) {
         G(from)(to) = globalTrailUpdate(G(from)(to), tour.length)
         G(to)(from) = globalTrailUpdate(G(to)(from), tour.length)
