@@ -14,20 +14,17 @@ package acs.akka
  *  But in reality this is not the most efficient approach either way and will be refectored when it matters.
  */
 
-import akka.actor.{Props, ActorRef, Actor}
-import scala.annotation.tailrec
+import akka.actor.{Props, Actor}
 import acs.Params
-import acs.TspData.Matrix
+import acs.Types._
 
 object Graph {
-  type NodeID = Int
+  type View = Array[Edge]
 
   case class Look(at: NodeID)
-  type View = Array[Edge]
   case class Travel(from: NodeID, to: NodeID)
   case class Edge(to: NodeID, distance: Double, p_weight: Double)
 
-  case class Tour(length: Double, path: List[Graph.NodeID])
   case class GlobalUpdate(tour: Tour)
   case object UpdateDone
 

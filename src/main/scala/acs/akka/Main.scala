@@ -3,7 +3,7 @@ package acs.akka
 import akka.actor._
 import scala.concurrent.duration._
 import acs.{Params, TspData}
-import acs.TspData.Matrix
+import acs.Types._
 
 class Main extends Actor {
   import context.dispatcher
@@ -15,7 +15,7 @@ class Main extends Actor {
   colony ! Colony.Start(10)
 
   def receive = {
-    case Graph.Tour(length, path) =>
+    case Tour(length, path) =>
       println(s"TOUR($length)")
       colony ! Colony.Start(10)
 

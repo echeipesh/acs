@@ -12,13 +12,13 @@ package acs.akka
  */
 
 import Graph._
-import Graph.Edge
 import akka.actor.{Props, ActorRef, Actor}
 import acs.Params
+import acs.Types._
 
 object Ant{
-  case class TourCompleted(tour: Graph.Tour)
-  def Props(g: ActorRef, start: Graph.NodeID, params: Params):Props = akka.actor.Props(classOf[Ant], g, start, params)
+  case class TourCompleted(tour: Tour)
+  def Props(g: ActorRef, start: NodeID, params: Params):Props = akka.actor.Props(classOf[Ant], g, start, params)
 }
 
 /**
@@ -27,7 +27,7 @@ object Ant{
  * @param G the graph acs.akka.Ant is exploring
  * @param start index of the starting node (0-indexed)
  */
-class Ant(G: ActorRef, start: Graph.NodeID, params: Params) extends Actor {
+class Ant(G: ActorRef, start: NodeID, params: Params) extends Actor {
 
   //path traveled, in reverse order
   var path:List[NodeID] = start :: Nil
@@ -49,7 +49,7 @@ class Ant(G: ActorRef, start: Graph.NodeID, params: Params) extends Actor {
         //recall G is fully connected, so we can always return to start
         val edgeHome = view.filter(_.to == start).head
         takeEdge(edgeHome)
-        context.parent ! Ant.TourCompleted(Graph.Tour(distanceCovered,path))
+        context.parent ! Ant.TourCompleted(Tour(distanceCovered,path))
         context.stop(self)
       }
   }

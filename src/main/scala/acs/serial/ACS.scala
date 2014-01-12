@@ -1,6 +1,6 @@
 package acs.serial
 
-import acs.TspData.Matrix
+import acs.Types._
 import acs.Params
 
 /**
@@ -10,5 +10,7 @@ import acs.Params
  */
 class ACS(G: Matrix[Double], p: Params) {
   def this(G:Matrix[Double]) = this(G, Params.forGraph(G))
+
+  def iteration(ants: Int = 10):Tour = ???
 
 }

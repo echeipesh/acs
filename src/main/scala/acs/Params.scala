@@ -1,13 +1,12 @@
 package acs
 
-import TspData.Matrix
+import Types._
 import scala.annotation.tailrec
 
 /**
  * User: eugene
  * Date: 12/12/13
  */
-
 object Params {
   def default = Params(0.1, 1, 0.1, 0.9)
   def forGraph(G_dist: Matrix[Double]) = {

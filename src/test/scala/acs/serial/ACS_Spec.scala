@@ -10,6 +10,13 @@ class ACS_Spec extends FlatSpec with Matchers {
   val g = acs.TestGraphs.AB
 
   "ACS" should "be constructable" in {
-    val asc = new ASC(g)
+    val acs = new ACS(g)
+  }
+
+  it should "be able to perform a single iteration" in {
+    val acs = new ACS(g)
+
+    val tour = acs.iteration(ants = 10)
+
   }
 }

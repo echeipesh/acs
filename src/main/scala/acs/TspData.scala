@@ -1,5 +1,7 @@
 package acs
 
+import Types._
+
 /**
  * User: eugene
  * Date: 12/12/13
@@ -9,15 +11,6 @@ case class Point(id:String, x:Double, y:Double){
 }
 
 object TspData {
-  /**
-   * val m:Matrix[Double]
-   * Operation supported:
-   * - item in fromX, toY = m(fromX)(toY)
-   * - all items from X = m(fromX)
-   * @tparam T
-   */
-  type Matrix[T] = Array[Array[T]]
-
   def readTspFile(name: String):Matrix[Double] = {
     val source = io.Source.fromURL(getClass.getResource("/" + name))
     val points = (

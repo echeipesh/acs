@@ -9,7 +9,7 @@ package acs.akka
 import akka.actor._
 import akka.actor.Props
 import acs.Params
-import acs.TspData.Matrix
+import acs.Types._
 
 object Colony {
   /** Start a cycle with given number of ants */
@@ -42,7 +42,7 @@ class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
 
   //This should probably be Option[Tour]
   var ants:Set[ActorRef] = Set.empty
-  var bestTour: Graph.Tour = Graph.Tour(Double.MaxValue, Nil)
+  var bestTour: Tour = Tour(Double.MaxValue, Nil)
 
   def receive = waiting
 
@@ -56,7 +56,7 @@ class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
   }
 
   val running: Receive = {
-    case Ant.TourCompleted(tour: Graph.Tour) =>
+    case Ant.TourCompleted(tour: Tour) =>
       ants -= sender
       if (tour.length < bestTour.length)
         bestTour = tour
