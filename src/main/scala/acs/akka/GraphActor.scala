@@ -1,9 +1,11 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/8/13
  *
  * Design choices:
- * 1. The Graph manages the weight updates.
+ * 1. The acs.akka.Graph manages the weight updates.
  *  This is sufficient for the base implementation and keeps the messages both small and immutable.
  *  A more flexible alternative would be to accept Travel(from, to, f:Edge=>Edge) and use f for update.
  *  As long as f does not close over parent Actor scope it would be safe to use.
@@ -14,10 +16,11 @@
 
 import akka.actor.{Props, ActorRef, Actor}
 import scala.annotation.tailrec
+import acs.Params
+import acs.TspData.Matrix
 
 object Graph {
   type NodeID = Int
-  type Matrix[T] = Array[Array[T]]
 
   case class Look(at: NodeID)
   type View = Array[Edge]
@@ -28,43 +31,13 @@ object Graph {
   case class GlobalUpdate(tour: Tour)
   case object UpdateDone
 
-  def nearestNeighborTour(G_dist: Graph.Matrix[Double]):Double = {
-    @tailrec
-    def nn (at: NodeID, path: List[Long], tourLength:Double):Double = {
-      //make lists of next possible nodes
-      val nexts = for {
-        to <- 0 until G_dist(at).length
-        if to != at
-        if ! path.contains(to)
-      } yield to -> G_dist(at)(to)
-
-      if (nexts.isEmpty)
-        tourLength
-      else{
-        //choose the one with lowest distance (folding left)
-        val next = ( (0 -> Double.MaxValue) /: nexts ){
-          case (best, (to, dist)) =>
-            if (best._2 < dist)
-              best
-            else
-              (to, dist)
-        }
-
-        //return the length of the tour with chose + whatever length we choose after that
-        nn(next._1, next._1 :: path, next._2 + tourLength)
-      }
-    }
-
-    nn(0, Nil, 0)
-  }
-
   def Props(g_dist: Matrix[Double], params:Params):Props = akka.actor.Props(classOf[Graph], g_dist, params)
 }
 
 /**
- * Graph is assumed to be completely connected, edge exists between every pair of vertices
+ * acs.akka.Graph is assumed to be completely connected, edge exists between every pair of vertices
  */
-class Graph(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
+class Graph(G_dist: Matrix[Double], params: Params) extends Actor {
   import Graph._
   val G =
     for {from <- 0 until G_dist.length} yield
@@ -91,7 +64,7 @@ class Graph(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
 
 
   /**
-   * When an Ant uses an edge it changes the pheromone  on that trail
+   * When an acs.akka.Ant uses an edge it changes the pheromone  on that trail
    *
    * The first portion represents trail decay (presumably 'time' passed last time this edge was used)
    * The second portion is the new deposit

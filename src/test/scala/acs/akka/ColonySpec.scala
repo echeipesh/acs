@@ -1,12 +1,16 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/9/13
  */
 
+import acs.akka.{Graph, Colony}
 import akka.actor._
 import akka.testkit._
 import org.scalatest._
 import scala.concurrent.duration._
+import acs.Params
 
 class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   implicit val system = ActorSystem("TestSys")
@@ -22,10 +26,10 @@ class ColonySpec extends FlatSpec with Matchers with BeforeAndAfterAll {
     Array(20.0,  5.0,  5.0,  0.0)
   )
 
-  "Colony" should "solve TSP" in {
+  "acs.akka.Colony" should "solve TSP" in {
     val probe = TestProbe()
 
-    //Colony is going to launch ants as soon as it's constructed
+    //acs.akka.Colony is going to launch ants as soon as it's constructed
     //it should report to it's parent
     val sp = system.actorOf(
       Props(new StepParent(Colony.Props(G_dist, Params.default), probe.ref))

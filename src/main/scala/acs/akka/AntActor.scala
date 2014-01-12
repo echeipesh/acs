@@ -1,3 +1,5 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/8/13
@@ -9,7 +11,10 @@
  *  which is something I'm curious to try later :)
  */
 
+import Graph._
+import Graph.Edge
 import akka.actor.{Props, ActorRef, Actor}
+import acs.Params
 
 object Ant{
   case class TourCompleted(tour: Graph.Tour)
@@ -17,13 +22,12 @@ object Ant{
 }
 
 /**
- * Ant will traverse G starting from start until it will find new nodes it has not visited.
+ * acs.akka.Ant will traverse G starting from start until it will find new nodes it has not visited.
  * At that point it will assume the G is connected and travel home, reporting and stopping itself.
- * @param G the graph Ant is exploring
+ * @param G the graph acs.akka.Ant is exploring
  * @param start index of the starting node (0-indexed)
  */
 class Ant(G: ActorRef, start: Graph.NodeID, params: Params) extends Actor {
-  import Graph._
 
   //path traveled, in reverse order
   var path:List[NodeID] = start :: Nil

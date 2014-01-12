@@ -1,3 +1,5 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/8/13
@@ -6,12 +8,14 @@
 
 import akka.actor._
 import akka.actor.Props
+import acs.Params
+import acs.TspData.Matrix
 
 object Colony {
   /** Start a cycle with given number of ants */
   case class Start(ants: Int)
   case object GiveBestTour
-  def Props(g: Graph.Matrix[Double], params: Params):Props = akka.actor.Props(classOf[Colony], g, params)
+  def Props(g: Matrix[Double], params: Params):Props = akka.actor.Props(classOf[Colony], g, params)
 }
 /**
  * What do we do here?
@@ -29,9 +33,9 @@ object Colony {
  *  - receive UpdateDone in response to Global update
  *      only to best sent out after all the ants return
  *
- * @param G Actor representing a Graph we are traversing
+ * @param G Actor representing a acs.akka.Graph we are traversing
  */
-class Colony(G_dist: Graph.Matrix[Double], params: Params) extends Actor {
+class Colony(G_dist: Matrix[Double], params: Params) extends Actor {
   import Colony._
 
   val G = context.actorOf( Graph.Props(G_dist, params) )

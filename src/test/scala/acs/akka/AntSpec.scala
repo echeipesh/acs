@@ -1,11 +1,15 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/9/13
  */
 
+import acs.akka.{Graph, Ant}
 import akka.actor._
 import akka.testkit.TestProbe
 import org.scalatest._
+import acs.Params
 
 
 class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
@@ -19,7 +23,7 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   )
   val G = system.actorOf( Graph.Props(G_dist, Params.default), "GraphActor")
 
-  "Ant" should "send Travel in response to view update" in {
+  "acs.akka.Ant" should "send Travel in response to view update" in {
     val probe = TestProbe()
     val ant =  system.actorOf( Ant.Props(probe.ref, 0, Params.default))
     probe.expectMsg(Graph.Look(0))
@@ -27,9 +31,9 @@ class AntSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   it should "not go to through the same edge twice" in {
-    val probe = TestProbe() //acting as a Graph
+    val probe = TestProbe() //acting as a acs.akka.Graph
     val colonyProbe = TestProbe()
-    //stepColony will forward its msgs to the child(Ant)
+    //stepColony will forward its msgs to the child(acs.akka.Ant)
     val stepColony = system.actorOf(
       Props(new StepParent(Ant.Props(probe.ref, 0, Params.default), colonyProbe.ref))
     )

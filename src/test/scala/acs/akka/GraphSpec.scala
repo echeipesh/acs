@@ -1,13 +1,17 @@
+package acs.akka
+
 /**
  * User: eugene
  * Date: 12/9/13
  */
 
+import acs.akka.{Graph}
 import akka.actor._
 import akka.testkit.TestProbe
 import org.scalatest._
 import scala.concurrent.duration._
 import Graph._
+import acs.Params
 
 
 class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
@@ -24,7 +28,7 @@ class GraphSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   //avoid order for tests
   val PFtoSet:PartialFunction[Any, Set[Edge]] = {case x:Array[Edge] => x.toSet}
 
-  "Graph" should "respond to Look(at)" in {
+  "acs.akka.Graph" should "respond to Look(at)" in {
     probe.send(G, Look(0))
     probe.expectMsgPF(1.seconds)(PFtoSet) should equal ( Set(Edge(1,10,0), Edge(2,20,0)) )
 
