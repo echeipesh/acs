@@ -5,7 +5,8 @@ class Main extends Actor {
   import context.dispatcher
   context.system.scheduler.scheduleOnce(30 seconds, self, "STOP")
 
-  val colony = context.actorOf(Colony.Props(TspData.readTspFile("tsp.dat"), Params.default), "Colony")
+  val g:Graph.Matrix[Double] = TspData.readTspFile("tsp.dat")
+  val colony = context.actorOf(Colony.Props(g, Params.forGraph(g)), "Colony")
 
   colony ! Colony.Start(10)
 

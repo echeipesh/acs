@@ -5,6 +5,14 @@
 
 object Params {
   def default = Params(0.1, 1, 0.1, 0.9)
+  def forGraph(G_dist: Graph.Matrix[Double]) = {
+    Params(
+      alpha = 0.1,
+      beta = 2,
+      tao_0 = G_dist.length * Graph.nearestNeighborTour(G_dist),
+      q_0 = 0.9
+    )
+  }
 }
 
 /**
