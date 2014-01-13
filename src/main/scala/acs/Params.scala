@@ -8,12 +8,12 @@ import scala.annotation.tailrec
  * Date: 12/12/13
  */
 object Params {
-  def default = Params(0.1, 1, 0.1, 0.9)
+  def default = Params(0.1, 2, 0.1, 0.9)
   def forGraph(G_dist: Matrix[Double]) = {
     Params(
       alpha = 0.1,
       beta = 2,
-      tao_0 = G_dist.length * nearestNeighborTour(G_dist),
+      tao_0 = 1/(G_dist.length * nearestNeighborTour(G_dist)),
       q_0 = 0.9
     )
   }
@@ -24,7 +24,7 @@ object Params {
    * @param G_dist matrix of edge lengths in a fully connected graph
    * @return length of nearest neighbor tour starting at node 0
    */
-  private def nearestNeighborTour(G_dist: Matrix[Double]):Double = {
+  def nearestNeighborTour(G_dist: Matrix[Double]):Double = {
     @tailrec
     def nn (at: Int, path: List[Long], tourLength:Double):Double = {
       //make lists of next possible nodes
