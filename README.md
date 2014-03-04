@@ -2,6 +2,9 @@ acs
 ===
 
 Ant Colony System for TSP solution using Akka
+http://www.idsia.ch/~luca/acs-bio97.pdf
+
+And this is another paper, maybe it's good:
 http://www.idsia.ch/~luca/acs-ec97.pdf
 
 
